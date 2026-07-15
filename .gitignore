@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+.auth/
+artifacts/
+test-results/
+*.log
+.DS_Store
