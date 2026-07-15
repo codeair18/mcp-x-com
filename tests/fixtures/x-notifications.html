@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Notifications / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <section aria-label="Timeline: Notifications">
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/frank"><span>Frank Fixture</span></a>
+              <a href="/frank" tabindex="-1"><span>@frank</span></a>
+            </div>
+            <a href="/frank/status/1000000000000000070">
+              <time datetime="2026-07-14T09:00:00.000Z">Jul 14</time>
+            </a>
+            <div data-testid="tweetText">@testuser this is a mention in notifications.</div>
+            <button data-testid="reply" aria-label="1 Reply. Reply"></button>
+            <button data-testid="retweet" aria-label="0 reposts. Repost"></button>
+            <button data-testid="like" aria-label="1 Like. Like"></button>
+          </article>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
