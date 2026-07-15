@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Test User on X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <article data-testid="tweet" tabindex="-1">
+          <div data-testid="User-Name">
+            <a href="/testuser"><span>Test User</span></a>
+            <a href="/testuser" tabindex="-1"><span>@testuser</span></a>
+          </div>
+          <a href="/testuser/status/1000000000000000042">
+            <time datetime="2026-07-12T09:15:00.000Z">Jul 12</time>
+          </a>
+          <div data-testid="tweetText">Fixture post that write actions target.</div>
+          <button data-testid="caret" aria-label="More"></button>
+          <button data-testid="reply" aria-label="0 Replies. Reply"></button>
+          <button data-testid="retweet" aria-label="1 repost. Repost"></button>
+          <button data-testid="like" aria-label="2 Likes. Like"></button>
+        </article>
+        <div data-testid="tweetTextarea_0" contenteditable="true" role="textbox" aria-label="Post your reply"></div>
+        <button data-testid="tweetButtonInline" disabled>Reply</button>
+        <div id="menu-root"></div>
+        <div id="toast-root"></div>
+      </div>
+    </main>
+    <script>
+      // Simulates like/repost/delete/reply flows on a status page.
+      // Query params: ?liked=1 and ?reposted=1 set the initial button state.
+      const params = new URLSearchParams(location.search);
+      const article = document.querySelector('article');
+      const likeBtn = article.querySelector('[data-testid="like"]');
+      const repostBtn = article.querySelector('[data-testid="retweet"]');
+      const caretBtn = article.querySelector('[data-testid="caret"]');
+      const menuRoot = document.getElementById('menu-root');
+      const toastRoot = document.getElementById('toast-root');
+      if (params.has('liked')) likeBtn.setAttribute('data-testid', 'unlike');
+      if (params.has('reposted')) repostBtn.setAttribute('data-testid', 'unretweet');
+
+      function toast(html) {
+        const el = document.createElement('div');
+        el.setAttribute('data-testid', 'toast');
+        el.innerHTML = html;
+        toastRoot.appendChild(el);
+      }
+
+      likeBtn.addEventListener('click', () => {
+        const active = likeBtn.getAttribute('data-testid') === 'unlike';
+        likeBtn.setAttribute('data-testid', active ? 'like' : 'unlike');
+      });
+
+      repostBtn.addEventListener('click', () => {
+        if (repostBtn.getAttribute('data-testid') === 'unretweet') return;
+        menuRoot.innerHTML =
+          '<div role="menu"><div role="menuitem" data-testid="retweetConfirm">Repost</div></div>';
+        menuRoot.querySelector('[data-testid="retweetConfirm"]').addEventListener('click', () => {
+          repostBtn.setAttribute('data-testid', 'unretweet');
+          menuRoot.innerHTML = '';
+        });
+      });
+
+      caretBtn.addEventListener('click', () => {
+        menuRoot.innerHTML = '<div role="menu"><div role="menuitem">Delete</div></div>';
+        menuRoot.querySelector('[role="menuitem"]').addEventListener('click', () => {
+          menuRoot.innerHTML =
+            '<div role="dialog"><button data-testid="confirmationSheetConfirm">Delete</button></div>';
+          menuRoot
+            .querySelector('[data-testid="confirmationSheetConfirm"]')
+            .addEventListener('click', () => {
+              article.remove();
+              menuRoot.innerHTML = '';
+              toast('Your post was deleted');
+            });
+        });
+      });
+
+      const replyBox = document.querySelector('[data-testid="tweetTextarea_0"]');
+      const replyBtn = document.querySelector('[data-testid="tweetButtonInline"]');
+      replyBox.addEventListener('input', () => {
+        const len = replyBox.textContent.trim().length;
+        if (len > 0 && len <= 280) replyBtn.removeAttribute('disabled');
+        else replyBtn.setAttribute('disabled', '');
+      });
+      replyBtn.addEventListener('click', () => {
+        toast('<a href="/testuser/status/1000000000000000100">View post</a>');
+      });
+    </script>
+  </body>
+</html>

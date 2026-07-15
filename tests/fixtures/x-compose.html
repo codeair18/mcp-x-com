@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Compose / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="tweetTextarea_0" contenteditable="true" role="textbox" aria-label="Post text"></div>
+      <input data-testid="fileInput" type="file" multiple accept="image/*" />
+      <div data-testid="attachments"></div>
+      <button data-testid="tweetButton" disabled>Post</button>
+      <div id="toast-root"></div>
+    </main>
+    <script>
+      // Simulates X compose behavior: the post button enables only for
+      // non-empty text within the limit; posting shows a toast with a link.
+      // Query params: ?disabled=1 keeps the button disabled, ?silent=1
+      // makes clicking produce no observable result.
+      const params = new URLSearchParams(location.search);
+      const box = document.querySelector('[data-testid="tweetTextarea_0"]');
+      const btn = document.querySelector('[data-testid="tweetButton"]');
+      const input = document.querySelector('[data-testid="fileInput"]');
+      const attachments = document.querySelector('[data-testid="attachments"]');
+      function refresh() {
+        const len = box.textContent.trim().length;
+        const ok = len > 0 && len <= 280 && !params.has('disabled');
+        if (ok) btn.removeAttribute('disabled');
+        else btn.setAttribute('disabled', '');
+      }
+      box.addEventListener('input', refresh);
+      input.addEventListener('change', () => {
+        attachments.innerHTML = '';
+        for (const file of input.files) {
+          const item = document.createElement('div');
+          item.textContent = file.name;
+          attachments.appendChild(item);
+        }
+        refresh();
+      });
+      btn.addEventListener('click', () => {
+        if (params.has('silent')) return;
+        const toast = document.createElement('div');
+        toast.setAttribute('data-testid', 'toast');
+        toast.innerHTML = '<a href="/testuser/status/1000000000000000099">View post</a>';
+        document.getElementById('toast-root').appendChild(toast);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dana Fixture (@dana) / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <div data-testid="UserName">
+          <span>Dana Fixture</span>
+          <span>@dana</span>
+        </div>
+        <button data-testid="123-follow" aria-label="Follow @dana">Follow</button>
+      </div>
+    </main>
+    <script>
+      // ?following=1 renders the already-following state.
+      const params = new URLSearchParams(location.search);
+      const btn = document.querySelector('button[data-testid$="-follow"]');
+      if (params.has('following')) {
+        btn.setAttribute('data-testid', '123-unfollow');
+        btn.textContent = 'Following';
+      }
+      btn.addEventListener('click', () => {
+        if (btn.getAttribute('data-testid') === '123-unfollow') return;
+        btn.setAttribute('data-testid', '123-unfollow');
+        btn.textContent = 'Following';
+      });
+    </script>
+  </body>
+</html>

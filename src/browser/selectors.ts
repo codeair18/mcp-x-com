@@ -32,6 +32,26 @@ export const SELECTORS = {
     followingLink: 'a[href$="/following"]',
     followersLink: 'a[href$="/verified_followers"], a[href$="/followers"]',
   },
+  compose: {
+    textbox: '[data-testid="tweetTextarea_0"]',
+    postButton: '[data-testid="tweetButton"], [data-testid="tweetButtonInline"]',
+    fileInput: 'input[data-testid="fileInput"]',
+    attachments: '[data-testid="attachments"]',
+  },
+  actions: {
+    like: '[data-testid="like"]',
+    unlike: '[data-testid="unlike"]',
+    repost: '[data-testid="retweet"]',
+    unrepost: '[data-testid="unretweet"]',
+    repostConfirm: '[data-testid="retweetConfirm"]',
+    caret: '[data-testid="caret"]',
+    /** Text-based fallback: the delete menu item has no stable testid. */
+    deleteMenuItem: '[role="menuitem"]:has-text("Delete")',
+    confirmDialogButton: '[data-testid="confirmationSheetConfirm"]',
+    followButton: '[data-testid$="-follow"]',
+    unfollowButton: '[data-testid$="-unfollow"]',
+    toast: '[data-testid="toast"]',
+  },
   /** URL path fragments that indicate X wants human attention. */
   checkpointPaths: ['/account/access', '/i/flow/login'],
 } as const;
