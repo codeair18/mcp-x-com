@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dana Fixture (@dana) / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <div data-testid="UserName">
+          <span>Dana Fixture</span>
+          <span>@dana</span>
+        </div>
+        <div data-testid="UserDescription">Test profile for the X browser MCP fixtures.</div>
+        <span data-testid="UserLocation">Fixture City</span>
+        <a data-testid="UserUrl" href="https://example.org">example.org</a>
+        <span data-testid="UserJoinDate">Joined March 2020</span>
+        <a href="/dana/following"><span>321</span> <span>Following</span></a>
+        <a href="/dana/verified_followers"><span>5,432</span> <span>Followers</span></a>
+        <section aria-label="Timeline: Dana Fixture’s posts">
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/dana"><span>Dana Fixture</span></a>
+              <a href="/dana" tabindex="-1"><span>@dana</span></a>
+            </div>
+            <a href="/dana/status/1000000000000000050">
+              <time datetime="2026-07-01T10:00:00.000Z">Jul 1</time>
+            </a>
+            <div data-testid="tweetText">Pinned-style fixture post on the profile.</div>
+            <button data-testid="reply" aria-label="1 Reply. Reply"></button>
+            <button data-testid="retweet" aria-label="0 reposts. Repost"></button>
+            <button data-testid="like" aria-label="7 Likes. Like"></button>
+          </article>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

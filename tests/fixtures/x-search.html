@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MCP browser automation - Search / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <section aria-label="Timeline: Search timeline">
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/alice"><span>Alice Example</span></a>
+              <a href="/alice" tabindex="-1"><span>@alice</span></a>
+            </div>
+            <a href="/alice/status/1000000000000000001">
+              <time datetime="2026-07-10T12:00:00.000Z">Jul 10</time>
+            </a>
+            <div data-testid="tweetText">First fixture post about browser automation.</div>
+            <button data-testid="reply" aria-label="5 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="2 reposts. Repost"></button>
+            <button data-testid="like" aria-label="10 Likes. Like"></button>
+          </article>
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/erin"><span>Erin Fixture</span></a>
+              <a href="/erin" tabindex="-1"><span>@erin</span></a>
+            </div>
+            <a href="/erin/status/1000000000000000060">
+              <time datetime="2026-07-13T15:45:00.000Z">Jul 13</time>
+            </a>
+            <div data-testid="tweetText">Search result about MCP servers.</div>
+            <button data-testid="reply" aria-label="2 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="4 reposts. Repost"></button>
+            <button data-testid="like" aria-label="2M Likes. Like"></button>
+          </article>
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/erin"><span>Erin Fixture</span></a>
+              <a href="/erin" tabindex="-1"><span>@erin</span></a>
+            </div>
+            <a href="/erin/status/1000000000000000060">
+              <time datetime="2026-07-13T15:45:00.000Z">Jul 13</time>
+            </a>
+            <div data-testid="tweetText">Search result about MCP servers.</div>
+            <button data-testid="reply" aria-label="2 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="4 reposts. Repost"></button>
+            <button data-testid="like" aria-label="2M Likes. Like"></button>
+          </article>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

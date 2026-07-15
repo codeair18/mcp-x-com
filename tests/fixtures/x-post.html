@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Carol on X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <article data-testid="tweet" tabindex="-1">
+          <div data-testid="User-Name">
+            <a href="/carol"><span>Carol Fixture</span></a>
+            <a href="/carol" tabindex="-1"><span>@carol</span></a>
+          </div>
+          <a href="/carol/status/1000000000000000042">
+            <time datetime="2026-07-12T09:15:00.000Z">Jul 12</time>
+          </a>
+          <div data-testid="tweetText">Main fixture post with two photos and a quote.</div>
+          <div data-testid="tweetPhoto"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="First photo" /></div>
+          <div data-testid="tweetPhoto"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" /></div>
+          <div role="link" tabindex="0">
+            <div data-testid="User-Name">
+              <a href="/alice"><span>Alice Example</span></a>
+              <a href="/alice" tabindex="-1"><span>@alice</span></a>
+            </div>
+            <a href="/alice/status/1000000000000000001">
+              <time datetime="2026-07-10T12:00:00.000Z">Jul 10</time>
+            </a>
+            <div data-testid="tweetText">First fixture post about browser automation.</div>
+          </div>
+          <button data-testid="reply" aria-label="12 Replies. Reply"></button>
+          <button data-testid="retweet" aria-label="1,234 reposts. Repost"></button>
+          <button data-testid="like" aria-label="5.3K Likes. Like"></button>
+        </article>
+        <article data-testid="tweet">
+          <div>Replying to <a href="/carol">@carol</a></div>
+          <div data-testid="User-Name">
+            <a href="/dave"><span>Dave Fixture</span></a>
+            <a href="/dave" tabindex="-1"><span>@dave</span></a>
+          </div>
+          <a href="/dave/status/1000000000000000043">
+            <time datetime="2026-07-12T10:00:00.000Z">Jul 12</time>
+          </a>
+          <div data-testid="tweetText">A reply without visible metrics.</div>
+          <button data-testid="reply"></button>
+          <button data-testid="retweet"></button>
+          <button data-testid="like"></button>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>
