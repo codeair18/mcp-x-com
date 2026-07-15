@@ -150,6 +150,53 @@ describe('MCP server', () => {
     expect(outcome.resultUrl).toContain('/status/');
   });
 
+  it('answers every read tool against fixtures', async () => {
+    const session = await client.callTool({ name: 'x_session_status', arguments: {} });
+    expect(firstText(session)).toContain('logged_in');
+
+    const profile = await client.callTool({
+      name: 'x_get_profile',
+      arguments: { target: '@dana' },
+    });
+    expect(firstText(profile)).toContain('"handle": "dana"');
+
+    const search = await client.callTool({
+      name: 'x_search_posts',
+      arguments: { query: 'mcp', limit: 5, sort: 'latest' },
+    });
+    expect(firstText(search)).toContain('"posts"');
+
+    const timeline = await client.callTool({
+      name: 'x_get_timeline',
+      arguments: { limit: 2 },
+    });
+    expect(firstText(timeline)).toContain('"posts"');
+
+    const notifications = await client.callTool({
+      name: 'x_get_notifications',
+      arguments: {},
+    });
+    expect(firstText(notifications)).toContain('frank');
+  });
+
+  it('prepares every write kind without side effects', async () => {
+    const target = 'https://x.com/testuser/status/1000000000000000042';
+    const calls: [string, Record<string, unknown>][] = [
+      ['x_prepare_reply', { target, text: 'A reply' }],
+      ['x_prepare_like', { target }],
+      ['x_prepare_repost', { target }],
+      ['x_prepare_follow', { handle: '@dana' }],
+      ['x_prepare_delete_post', { target }],
+    ];
+    for (const [name, args] of calls) {
+      const result = await client.callTool({ name, arguments: args });
+      expect(result.isError, `${name} should succeed`).toBeFalsy();
+      const prep = JSON.parse(firstText(result)) as { executed: boolean; requiredPhrase: string };
+      expect(prep.executed).toBe(false);
+      expect(prep.requiredPhrase.length).toBeGreaterThan(0);
+    }
+  });
+
   it('rejects execution with a wrong phrase', async () => {
     const prepared = await client.callTool({
       name: 'x_prepare_post',

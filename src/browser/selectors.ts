@@ -9,7 +9,9 @@ export const SELECTORS = {
     accountSwitcher: '[data-testid="SideNav_AccountSwitcher_Button"]',
     avatarContainerPrefix: 'UserAvatar-Container-',
     profileLink: '[data-testid="AppTabBar_Profile_Link"]',
-    loggedOutCta: '[data-testid="loginButton"], [data-testid="signupButton"]',
+    /** BottomBar is the logged-out "Log in / Sign up" banner. */
+    loggedOutCta:
+      '[data-testid="loginButton"], [data-testid="signupButton"], [data-testid="BottomBar"]',
   },
   post: {
     article: 'article[data-testid="tweet"]',
