@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Home / X</title>
+  </head>
+  <body>
+    <header role="banner">
+      <nav role="navigation">
+        <a data-testid="AppTabBar_Home_Link" href="/home">Home</a>
+        <a data-testid="AppTabBar_Profile_Link" href="/testuser">Profile</a>
+      </nav>
+      <button data-testid="SideNav_AccountSwitcher_Button" aria-label="Account menu">
+        <div data-testid="UserAvatar-Container-testuser"></div>
+        <span>Test User</span>
+        <span>@testuser</span>
+      </button>
+    </header>
+    <main role="main">
+      <div data-testid="primaryColumn">
+        <section aria-label="Timeline: Your Home Timeline">
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/alice"><span>Alice Example</span></a>
+              <a href="/alice" tabindex="-1"><span>@alice</span></a>
+            </div>
+            <a href="/alice/status/1000000000000000001">
+              <time datetime="2026-07-10T12:00:00.000Z">Jul 10</time>
+            </a>
+            <div data-testid="tweetText">First fixture post about browser automation.</div>
+            <button data-testid="reply" aria-label="5 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="2 reposts. Repost"></button>
+            <button data-testid="like" aria-label="10 Likes. Like"></button>
+          </article>
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/bob"><span>Bob Fixture</span></a>
+              <a href="/bob" tabindex="-1"><span>@bob</span></a>
+            </div>
+            <a href="/bob/status/1000000000000000002">
+              <time datetime="2026-07-11T08:30:00.000Z">Jul 11</time>
+            </a>
+            <div data-testid="tweetText">Second fixture post with an image.</div>
+            <div data-testid="tweetPhoto"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="A test image" /></div>
+            <button data-testid="reply" aria-label="0 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="1 repost. Repost"></button>
+            <button data-testid="like" aria-label="3 Likes. Like"></button>
+          </article>
+          <article data-testid="tweet">
+            <div data-testid="User-Name">
+              <a href="/alice"><span>Alice Example</span></a>
+              <a href="/alice" tabindex="-1"><span>@alice</span></a>
+            </div>
+            <a href="/alice/status/1000000000000000001">
+              <time datetime="2026-07-10T12:00:00.000Z">Jul 10</time>
+            </a>
+            <div data-testid="tweetText">First fixture post about browser automation.</div>
+            <button data-testid="reply" aria-label="5 Replies. Reply"></button>
+            <button data-testid="retweet" aria-label="2 reposts. Repost"></button>
+            <button data-testid="like" aria-label="10 Likes. Like"></button>
+          </article>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
