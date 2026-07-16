@@ -34,6 +34,17 @@ npm run build
 npm run login
 ```
 
+If your X account uses a passkey / hardware key (Touch ID, YubiKey) or the
+SMS code never arrives, log in through your real system Chrome instead of
+the bundled Chromium:
+
+```bash
+X_BROWSER_CHANNEL=chrome npm run login
+```
+
+(and keep `X_BROWSER_CHANNEL=chrome` set when running the server, so it
+reuses the same profile with the same browser).
+
 This opens a headed Chromium with a dedicated profile (`.auth/x-profile` by
 default) on x.com. Log in yourself — password, 2FA, CAPTCHA are typed by you
 in the browser window; the script never reads or touches credential fields.
@@ -56,6 +67,7 @@ Copy `.env.example` and adjust as needed. Key variables:
 | --- | --- | --- |
 | `X_BROWSER_PROFILE_DIR` | `.auth/x-profile` | Persistent browser profile (a secret — see SECURITY.md) |
 | `X_BROWSER_CDP_URL` | _(empty)_ | Optional CDP endpoint of an already-running browser; **takes precedence** over the profile |
+| `X_BROWSER_CHANNEL` | _(empty)_ | Use a real system browser (`chrome`, `chrome-beta`, `chrome-dev`, `msedge`) instead of Playwright's Chromium. **Required for macOS passkeys / hardware keys / Touch ID during login** — the bundled Chromium has no keychain integration, and SMS codes are also less likely to be challenged in a real browser |
 | `X_BROWSER_HEADLESS` | `false` | Headed by default; headless is more likely to be challenged by X |
 | `X_BROWSER_TIMEOUT_MS` | `15000` | Per-operation UI timeout |
 | `X_MAX_READ_ITEMS` | `20` | Hard cap on items per read call |

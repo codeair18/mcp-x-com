@@ -18,6 +18,12 @@ const envSchema = z.object({
     .transform((value) => (value === '' ? undefined : value))
     .pipe(z.url().optional())
     .optional(),
+  X_BROWSER_CHANNEL: z
+    .string()
+    .trim()
+    .transform((value) => (value === '' ? undefined : value))
+    .pipe(z.enum(['chrome', 'chrome-beta', 'chrome-dev', 'msedge']).optional())
+    .optional(),
   X_BROWSER_LOCALE: z.string().min(2).default('en-US'),
   X_BROWSER_TIMEOUT_MS: intInRange(1_000, 120_000).default(15_000),
   X_MAX_READ_ITEMS: intInRange(1, 100).default(20),
@@ -35,6 +41,12 @@ export interface AppConfig {
     headless: boolean;
     profileDir: string;
     cdpUrl?: string;
+    /**
+     * Browser channel for persistent mode. Playwright's bundled Chromium has
+     * no macOS keychain/passkey integration, so hardware keys and Touch ID
+     * only work with a real system browser, e.g. "chrome".
+     */
+    channel?: 'chrome' | 'chrome-beta' | 'chrome-dev' | 'msedge';
     locale: string;
     timeoutMs: number;
   };
@@ -74,6 +86,7 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
       headless: raw.X_BROWSER_HEADLESS,
       profileDir: raw.X_BROWSER_PROFILE_DIR,
       ...(raw.X_BROWSER_CDP_URL !== undefined ? { cdpUrl: raw.X_BROWSER_CDP_URL } : {}),
+      ...(raw.X_BROWSER_CHANNEL !== undefined ? { channel: raw.X_BROWSER_CHANNEL } : {}),
       locale: raw.X_BROWSER_LOCALE,
       timeoutMs: raw.X_BROWSER_TIMEOUT_MS,
     },

@@ -29,6 +29,16 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ X_BROWSER_CDP_URL: 'not-a-url' })).toThrow(/X_BROWSER_CDP_URL/);
   });
 
+  it('accepts a system browser channel and defaults to none', () => {
+    expect(loadConfig({}).browser.channel).toBeUndefined();
+    expect(loadConfig({ X_BROWSER_CHANNEL: '' }).browser.channel).toBeUndefined();
+    expect(loadConfig({ X_BROWSER_CHANNEL: 'chrome' }).browser.channel).toBe('chrome');
+  });
+
+  it('rejects an unknown browser channel', () => {
+    expect(() => loadConfig({ X_BROWSER_CHANNEL: 'firefox' })).toThrow(/X_BROWSER_CHANNEL/);
+  });
+
   it('parses booleans and numbers from strings', () => {
     const config = loadConfig({
       X_BROWSER_HEADLESS: 'true',

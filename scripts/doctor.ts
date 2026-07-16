@@ -29,14 +29,18 @@ async function main(): Promise<void> {
   const config = loadConfig(process.env);
   console.log('Config:', JSON.stringify(redactConfig(config)));
 
-  const chromiumPath = chromium.executablePath();
-  record(
-    'chromium',
-    existsSync(chromiumPath),
-    existsSync(chromiumPath)
-      ? 'Playwright Chromium installed'
-      : 'missing — run `npx playwright install chromium`',
-  );
+  if (config.browser.channel) {
+    record('chromium', true, `using system browser channel "${config.browser.channel}"`);
+  } else {
+    const chromiumPath = chromium.executablePath();
+    record(
+      'chromium',
+      existsSync(chromiumPath),
+      existsSync(chromiumPath)
+        ? 'Playwright Chromium installed'
+        : 'missing — run `npx playwright install chromium`',
+    );
+  }
 
   if (config.browser.mode === 'cdp') {
     record('browser-mode', true, 'CDP (X_BROWSER_CDP_URL is set, takes precedence)');

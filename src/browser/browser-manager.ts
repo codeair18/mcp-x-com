@@ -68,6 +68,9 @@ export class BrowserManager {
         headless: this.config.headless,
         locale: this.config.locale,
         viewport: { width: 1280, height: 900 },
+        // A real system browser (e.g. channel "chrome") is required for
+        // macOS passkeys/hardware keys during manual login.
+        ...(this.config.channel !== undefined ? { channel: this.config.channel } : {}),
       });
     }
     this.context.setDefaultTimeout(this.config.timeoutMs);
