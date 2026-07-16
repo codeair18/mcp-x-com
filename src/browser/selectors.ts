@@ -21,8 +21,11 @@ export const SELECTORS = {
     replyButton: '[data-testid="reply"]',
     repostButton: '[data-testid="retweet"], [data-testid="unretweet"]',
     likeButton: '[data-testid="like"], [data-testid="unlike"]',
-    /** Quoted posts render as an embedded link card inside the article. */
-    quoteContainer: '[role="link"]',
+    /**
+     * Quoted posts render as an embedded card in a div with role="link".
+     * Must be div-scoped: X sets role="link" explicitly on every <a> too.
+     */
+    quoteContainer: 'div[role="link"]',
     statusLink: 'a[href*="/status/"]',
   },
   profile: {
