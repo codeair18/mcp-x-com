@@ -187,7 +187,12 @@ export class ReadService {
       throw new XError('RATE_LIMITED', 'X reports the rate limit is exceeded; wait before retrying');
     }
     if (await loggedOut.isVisible()) {
-      throw new XError('NOT_AUTHENTICATED', 'Not logged in — run `npm run login` first');
+      // The logged-in UI renders a "BottomBar" too (messages drawer), so a
+      // visible account switcher overrides the logged-out marker.
+      const accountSwitcher = page.locator(SELECTORS.session.accountSwitcher).first();
+      if (!(await accountSwitcher.isVisible())) {
+        throw new XError('NOT_AUTHENTICATED', 'Not logged in — run `npm run login` first');
+      }
     }
     if (await loadError.isVisible()) {
       throw new XError('SELECTOR_DRIFT', 'X reported an error loading the page');

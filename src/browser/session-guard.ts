@@ -30,13 +30,18 @@ export async function detectSessionState(page: Page, timeoutMs: number): Promise
     return { status: 'unknown' };
   }
 
+  // The logged-in check must come first: the logged-in UI also renders a
+  // "BottomBar" (the messages drawer), which doubles as the logged-out CTA
+  // banner's testid.
+  if (await accountSwitcher.first().isVisible()) {
+    const handle = await readActiveHandle(page);
+    if (handle) {
+      return { status: 'logged_in', handle };
+    }
+    return { status: 'unknown' };
+  }
   if (await loggedOutCta.first().isVisible()) {
     return { status: 'logged_out' };
-  }
-
-  const handle = await readActiveHandle(page);
-  if (handle) {
-    return { status: 'logged_in', handle };
   }
   return { status: 'unknown' };
 }
