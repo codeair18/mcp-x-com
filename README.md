@@ -69,11 +69,14 @@ Copy `.env.example` and adjust as needed. Key variables:
 | `X_BROWSER_CDP_URL` | _(empty)_ | Optional CDP endpoint of an already-running browser; **takes precedence** over the profile |
 | `X_BROWSER_CHANNEL` | _(empty)_ | Use a real system browser (`chrome`, `chrome-beta`, `chrome-dev`, `msedge`) instead of Playwright's Chromium. **Required for macOS passkeys / hardware keys / Touch ID during login** — the bundled Chromium has no keychain integration, and SMS codes are also less likely to be challenged in a real browser |
 | `X_BROWSER_HEADLESS` | `false` | Headed by default; headless is more likely to be challenged by X |
+| `X_BROWSER_LOCALE` | `en-US` | Browser locale; selectors are mostly locale-independent but English is the tested baseline |
 | `X_BROWSER_TIMEOUT_MS` | `15000` | Per-operation UI timeout |
 | `X_MAX_READ_ITEMS` | `20` | Hard cap on items per read call |
 | `X_ACTION_TOKEN_TTL_MS` | `120000` | Confirmation token lifetime |
 | `X_WRITE_RATE_PER_HOUR` | `10` | Self-imposed hourly write cap (plus a fixed 5 s spacing between writes) |
 | `X_SAVE_ERROR_ARTIFACTS` | `false` | Opt-in error screenshots into `X_ARTIFACTS_DIR` |
+| `X_ARTIFACTS_DIR` | `artifacts` | Where error screenshots are written (git-ignored, may contain private content) |
+| `LOG_LEVEL` | `info` | pino log level (`fatal`…`trace`); all logs go to stderr |
 
 ## Hooking it up to an MCP client
 
@@ -186,6 +189,21 @@ npm run lint && npm run typecheck
 
 Automated tests run exclusively against local HTML fixtures in
 `tests/fixtures/` — they never touch x.com and never write anywhere.
+
+### Code layout
+
+- `src/browser/` — Playwright layer: `browser-manager.ts` (single shared
+  page, all operations serialized), `navigation.ts` (allowlisted to
+  x.com/twitter.com plus `file:` for fixtures), `selectors.ts` (every X DOM
+  selector lives here), `session-guard.ts` (login/checkpoint detection from
+  public UI markers only).
+- `src/x/` — domain logic: `read-service.ts`, `write-service.ts`,
+  `parsers.ts` (DOM → typed results), `urls.ts`.
+- `src/safety/` — write gating: single-use confirmation tokens, phrase
+  validation, rate limiting.
+- `src/tools/` — MCP tool registration (read / prepare / execute).
+
+See `CLAUDE.md` for the full architecture notes and invariants.
 
 ## Troubleshooting
 
