@@ -1,5 +1,6 @@
 import type { Page } from 'playwright';
 import { SELECTORS } from './selectors.js';
+import { sleep } from './waits.js';
 
 export type SessionState =
   | { status: 'logged_in'; handle: string }
@@ -7,10 +8,19 @@ export type SessionState =
   | { status: 'checkpoint' }
   | { status: 'unknown' };
 
+/** How long a logged-out state must persist before it is believed. */
+const LOGGED_OUT_GRACE_MS = 2_000;
+const POLL_MS = 150;
+
 /**
  * Determines whether the current page belongs to a logged-in session and
  * which account is active. Reads only public UI markers — never cookies,
  * storage, or credential fields.
+ *
+ * X renders its UI in stages, and the logged-in messages drawer shares the
+ * "BottomBar" testid with the logged-out banner, so this polls and only
+ * believes "logged out" once that state persists for a grace period with
+ * no account switcher in sight.
  */
 export async function detectSessionState(page: Page, timeoutMs: number): Promise<SessionState> {
   const url = page.url();
@@ -18,32 +28,30 @@ export async function detectSessionState(page: Page, timeoutMs: number): Promise
     return { status: 'checkpoint' };
   }
 
-  const accountSwitcher = page.locator(SELECTORS.session.accountSwitcher);
-  const loggedOutCta = page.locator(SELECTORS.session.loggedOutCta);
+  const accountSwitcher = page.locator(SELECTORS.session.accountSwitcher).first();
+  const loggedOutCta = page.locator(SELECTORS.session.loggedOutCta).first();
 
-  try {
-    await accountSwitcher.or(loggedOutCta).first().waitFor({
-      state: 'visible',
-      timeout: timeoutMs,
-    });
-  } catch {
-    return { status: 'unknown' };
-  }
-
-  // The logged-in check must come first: the logged-in UI also renders a
-  // "BottomBar" (the messages drawer), which doubles as the logged-out CTA
-  // banner's testid.
-  if (await accountSwitcher.first().isVisible()) {
-    const handle = await readActiveHandle(page);
-    if (handle) {
-      return { status: 'logged_in', handle };
+  const deadline = Date.now() + timeoutMs;
+  const grace = Math.min(LOGGED_OUT_GRACE_MS, Math.floor(timeoutMs / 2));
+  let loggedOutSince: number | null = null;
+  for (;;) {
+    if (await accountSwitcher.isVisible()) {
+      const handle = await readActiveHandle(page);
+      return handle ? { status: 'logged_in', handle } : { status: 'unknown' };
     }
-    return { status: 'unknown' };
+    if (await loggedOutCta.isVisible()) {
+      loggedOutSince ??= Date.now();
+      if (Date.now() - loggedOutSince >= grace) {
+        return { status: 'logged_out' };
+      }
+    } else {
+      loggedOutSince = null;
+    }
+    if (Date.now() >= deadline) {
+      return { status: 'unknown' };
+    }
+    await sleep(POLL_MS);
   }
-  if (await loggedOutCta.first().isVisible()) {
-    return { status: 'logged_out' };
-  }
-  return { status: 'unknown' };
 }
 
 async function readActiveHandle(page: Page): Promise<string | null> {

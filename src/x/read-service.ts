@@ -45,6 +45,9 @@ export interface ReadServiceOptions {
 /** Error codes that must never trigger a retry. */
 const NON_RETRYABLE = new Set(['NOT_AUTHENTICATED', 'CHECKPOINT_REQUIRED', 'RATE_LIMITED', 'INVALID_TARGET']);
 const MAX_READ_RETRIES = 2;
+/** How long a logged-out state must persist before it is believed. */
+const LOGGED_OUT_GRACE_MS = 2_000;
+const PROBE_POLL_MS = 150;
 
 export class ReadService {
   private readonly urls: XUrlResolver;
@@ -158,6 +161,12 @@ export class ReadService {
   /**
    * Waits until the page shows either the expected content or a recognizable
    * failure state, and throws the matching typed error for failures.
+   *
+   * X renders its UI in stages within one React mount, so single-shot
+   * marker checks race each other. This polls instead, and only concludes
+   * "logged out" when that state persists for a grace period without the
+   * account switcher appearing (the logged-in UI also renders a "BottomBar"
+   * that doubles as the logged-out banner's testid).
    */
   private async probe(page: Page, contentSelector: string): Promise<void> {
     const url = page.url();
@@ -166,38 +175,39 @@ export class ReadService {
     }
     const content = page.locator(contentSelector).first();
     const loggedOut = page.locator(SELECTORS.session.loggedOutCta).first();
+    const accountSwitcher = page.locator(SELECTORS.session.accountSwitcher).first();
     const rateLimited = page.getByText(/rate limit exceeded/i).first();
     const loadError = page.getByText(/something went wrong/i).first();
 
-    try {
-      await content
-        .or(loggedOut)
-        .or(rateLimited)
-        .or(loadError)
-        .first()
-        .waitFor({ state: 'visible', timeout: this.options.timeoutMs });
-    } catch {
-      throw new XError('SELECTOR_DRIFT', `Timed out waiting for page content (${contentSelector})`);
-    }
-
-    if (await content.isVisible()) {
-      return;
-    }
-    if (await rateLimited.isVisible()) {
-      throw new XError('RATE_LIMITED', 'X reports the rate limit is exceeded; wait before retrying');
-    }
-    if (await loggedOut.isVisible()) {
-      // The logged-in UI renders a "BottomBar" too (messages drawer), so a
-      // visible account switcher overrides the logged-out marker.
-      const accountSwitcher = page.locator(SELECTORS.session.accountSwitcher).first();
-      if (!(await accountSwitcher.isVisible())) {
-        throw new XError('NOT_AUTHENTICATED', 'Not logged in — run `npm run login` first');
+    const deadline = Date.now() + this.options.timeoutMs;
+    const grace = Math.min(LOGGED_OUT_GRACE_MS, Math.floor(this.options.timeoutMs / 2));
+    let loggedOutSince: number | null = null;
+    for (;;) {
+      if (await content.isVisible()) {
+        return;
       }
+      if (await rateLimited.isVisible()) {
+        throw new XError('RATE_LIMITED', 'X reports the rate limit is exceeded; wait before retrying');
+      }
+      if (await loadError.isVisible()) {
+        throw new XError('SELECTOR_DRIFT', 'X reported an error loading the page');
+      }
+      if ((await loggedOut.isVisible()) && !(await accountSwitcher.isVisible())) {
+        loggedOutSince ??= Date.now();
+        if (Date.now() - loggedOutSince >= grace) {
+          throw new XError('NOT_AUTHENTICATED', 'Not logged in — run `npm run login` first');
+        }
+      } else {
+        loggedOutSince = null;
+      }
+      if (Date.now() >= deadline) {
+        throw new XError(
+          'SELECTOR_DRIFT',
+          `Timed out waiting for page content (${contentSelector})`,
+        );
+      }
+      await sleep(PROBE_POLL_MS);
     }
-    if (await loadError.isVisible()) {
-      throw new XError('SELECTOR_DRIFT', 'X reported an error loading the page');
-    }
-    throw new XError('SELECTOR_DRIFT', 'Page reached an unrecognized state');
   }
 
   /** Reads may retry; writes never go through this path. */
