@@ -31,6 +31,7 @@ async function main(): Promise<void> {
       maxPerHour: config.limits.writeRatePerHour,
     }),
     timeoutMs: config.browser.timeoutMs,
+    maxPostChars: config.limits.maxPostChars,
   });
 
   const server = createServer({ readService, writeService });

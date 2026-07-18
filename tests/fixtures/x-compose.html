@@ -21,15 +21,17 @@
       // Simulates X compose behavior: the post button enables only for
       // non-empty text within the limit; posting shows a toast with a link.
       // Query params: ?disabled=1 keeps the button disabled, ?silent=1
-      // makes clicking produce no observable result.
+      // makes clicking produce no observable result, ?premium=1 raises the
+      // character limit from the free 280 to the Premium 25000.
       const params = new URLSearchParams(location.search);
+      const charLimit = params.has('premium') ? 25000 : 280;
       const box = document.querySelector('[data-testid="tweetTextarea_0"]');
       const btn = document.querySelector('[data-testid="tweetButton"]');
       const input = document.querySelector('[data-testid="fileInput"]');
       const attachments = document.querySelector('[data-testid="attachments"]');
       function refresh() {
         const len = box.textContent.trim().length;
-        const ok = len > 0 && len <= 280 && !params.has('disabled');
+        const ok = len > 0 && len <= charLimit && !params.has('disabled');
         if (ok) btn.removeAttribute('disabled');
         else btn.setAttribute('disabled', '');
       }

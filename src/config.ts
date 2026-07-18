@@ -27,6 +27,7 @@ const envSchema = z.object({
   X_BROWSER_LOCALE: z.string().min(2).default('en-US'),
   X_BROWSER_TIMEOUT_MS: intInRange(1_000, 120_000).default(15_000),
   X_MAX_READ_ITEMS: intInRange(1, 100).default(20),
+  X_MAX_POST_CHARS: intInRange(1, 25_000).default(25_000),
   X_ACTION_TOKEN_TTL_MS: intInRange(10_000, 600_000).default(120_000),
   X_WRITE_RATE_PER_HOUR: intInRange(1, 100).default(10),
   X_ARTIFACTS_DIR: z.string().min(1).default('artifacts'),
@@ -52,6 +53,12 @@ export interface AppConfig {
   };
   limits: {
     maxReadItems: number;
+    /**
+     * Upper bound accepted at prepare time. Defaults to X Premium's 25 000;
+     * the account's real limit is enforced by X's own compose UI at execute
+     * time (PREMIUM_REQUIRED when a >280-char draft never enables the button).
+     */
+    maxPostChars: number;
     writeRatePerHour: number;
   };
   safety: {
@@ -92,6 +99,7 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     },
     limits: {
       maxReadItems: raw.X_MAX_READ_ITEMS,
+      maxPostChars: raw.X_MAX_POST_CHARS,
       writeRatePerHour: raw.X_WRITE_RATE_PER_HOUR,
     },
     safety: {

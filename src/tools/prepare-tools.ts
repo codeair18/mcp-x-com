@@ -17,7 +17,6 @@ const PREPARE_ANNOTATIONS = {
 const CONFIRM_FLOW =
   'Nothing is published yet: show the returned preview to the user, and only after their explicit approval call x_execute_action with the confirmationToken and the requiredPhrase. The token is single-use and expires.';
 
-const textSchema = z.string().min(1).max(280).describe('Post text (max 280 characters)');
 const mediaSchema = z
   .array(z.string())
   .max(4)
@@ -26,6 +25,13 @@ const mediaSchema = z
 const targetSchema = z.string().describe('Post URL (x.com/twitter.com) or bare status ID');
 
 export function registerPrepareTools(server: McpServer, writeService: WriteService): void {
+  const textSchema = z
+    .string()
+    .min(1)
+    .max(writeService.maxPostChars)
+    .describe(
+      `Post text (max ${writeService.maxPostChars} characters; accounts without X Premium are limited to 280 by X itself — longer drafts fail at execute with PREMIUM_REQUIRED)`,
+    );
   server.registerTool(
     'x_prepare_post',
     {

@@ -72,6 +72,7 @@ Copy `.env.example` and adjust as needed. Key variables:
 | `X_BROWSER_LOCALE` | `en-US` | Browser locale; selectors are mostly locale-independent but English is the tested baseline |
 | `X_BROWSER_TIMEOUT_MS` | `15000` | Per-operation UI timeout |
 | `X_MAX_READ_ITEMS` | `20` | Hard cap on items per read call |
+| `X_MAX_POST_CHARS` | `25000` | Prepare-time cap on post/reply length (X Premium ceiling). Accounts without Premium are still limited to 280 by X itself — longer drafts fail cleanly at execute with `PREMIUM_REQUIRED`, nothing gets submitted |
 | `X_ACTION_TOKEN_TTL_MS` | `120000` | Confirmation token lifetime |
 | `X_WRITE_RATE_PER_HOUR` | `10` | Self-imposed hourly write cap (plus a fixed 5 s spacing between writes) |
 | `X_SAVE_ERROR_ARTIFACTS` | `false` | Opt-in error screenshots into `X_ARTIFACTS_DIR` |
@@ -175,8 +176,8 @@ via `x_execute_action`. Rules:
 
 `NOT_AUTHENTICATED`, `CHECKPOINT_REQUIRED`, `RATE_LIMITED`, `SELECTOR_DRIFT`,
 `INVALID_TARGET`, `CONFIRMATION_REQUIRED`, `CONFIRMATION_EXPIRED`,
-`ACCOUNT_CHANGED`, `UNKNOWN_OUTCOME` — returned as `CODE: message` in tool
-error results.
+`ACCOUNT_CHANGED`, `UNKNOWN_OUTCOME`, `PREMIUM_REQUIRED` — returned as
+`CODE: message` in tool error results.
 
 ## Development
 
@@ -214,6 +215,9 @@ See `CLAUDE.md` for the full architecture notes and invariants.
   resolve it manually; automation stays stopped until then.
 - **`NOT_AUTHENTICATED`** — session expired or profile missing; run
   `npm run login`.
+- **`PREMIUM_REQUIRED`** — a draft over 280 characters was prepared but X
+  never enabled the post button, which usually means the account has no
+  Premium. Nothing was submitted; shorten the text or upgrade the account.
 - **`RATE_LIMITED`** — either the self-imposed write budget or X's own
   limit; wait it out, do not tighten the loop.
 - **Blocked/locked account** — stop all automation, resolve with X manually,

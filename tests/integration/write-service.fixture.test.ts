@@ -32,8 +32,14 @@ describe('WriteService (fixtures)', () => {
   let store: ActionStore;
   let limiter: WriteRateLimiter;
 
-  const service = (urls: WriteUrlResolver = resolver()) =>
-    new WriteService(manager, { store, limiter, timeoutMs: 3_000, urls });
+  const service = (urls: WriteUrlResolver = resolver(), maxPostChars?: number) =>
+    new WriteService(manager, {
+      store,
+      limiter,
+      timeoutMs: 3_000,
+      urls,
+      ...(maxPostChars !== undefined ? { maxPostChars } : {}),
+    });
 
   beforeAll(async () => {
     profileDir = await mkdtemp(join(tmpdir(), 'x-mcp-write-'));
@@ -74,10 +80,18 @@ describe('WriteService (fixtures)', () => {
       expect(url).not.toContain('x-compose.html');
     });
 
-    it('rejects text over the 280 character limit', async () => {
-      await expect(service().preparePost({ text: 'x'.repeat(281) })).rejects.toSatisfy(
+    it('rejects text over the 25000 character Premium limit', async () => {
+      await expect(service().preparePost({ text: 'x'.repeat(25_001) })).rejects.toSatisfy(
         (e: unknown) => isXError(e, 'INVALID_TARGET'),
       );
+    });
+
+    it('honors a configured lower character limit', async () => {
+      await expect(
+        service(resolver(), 100).preparePost({ text: 'x'.repeat(101) }),
+      ).rejects.toSatisfy((e: unknown) => isXError(e, 'INVALID_TARGET'));
+      const prep = await service(resolver(), 100).preparePost({ text: 'x'.repeat(100) });
+      expect(prep.executed).toBe(false);
     });
 
     it('rejects empty text', async () => {
@@ -209,6 +223,29 @@ describe('WriteService (fixtures)', () => {
           confirmationPhrase: 'CONFIRM',
         }),
       ).rejects.toSatisfy((e: unknown) => isXError(e, 'RATE_LIMITED'));
+    });
+
+    it('publishes a post over 280 characters when the account has Premium', async () => {
+      const svc = service(resolver({ compose: () => fixtureUrl('x-compose.html', '?premium=1') }));
+      const prep = await svc.preparePost({ text: 'y'.repeat(1_000) });
+      const result = await svc.executeAction({
+        confirmationToken: prep.confirmationToken,
+        confirmationPhrase: 'CONFIRM',
+      });
+      expect(result.executed).toBe(true);
+      expect(result.statusId).toBe('1000000000000000099');
+    });
+
+    it('reports PREMIUM_REQUIRED for a long draft when X keeps the button disabled', async () => {
+      // Default fixture behaves like a non-Premium account: 280-char cap.
+      const svc = service();
+      const prep = await svc.preparePost({ text: 'y'.repeat(300) });
+      await expect(
+        svc.executeAction({
+          confirmationToken: prep.confirmationToken,
+          confirmationPhrase: 'CONFIRM',
+        }),
+      ).rejects.toSatisfy((e: unknown) => isXError(e, 'PREMIUM_REQUIRED'));
     });
 
     it('reports SELECTOR_DRIFT when the post button never enables, without clicking', async () => {

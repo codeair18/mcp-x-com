@@ -44,11 +44,13 @@ describe('loadConfig', () => {
       X_BROWSER_HEADLESS: 'true',
       X_BROWSER_TIMEOUT_MS: '20000',
       X_MAX_READ_ITEMS: '5',
+      X_MAX_POST_CHARS: '4000',
       X_SAVE_ERROR_ARTIFACTS: 'true',
     });
     expect(config.browser.headless).toBe(true);
     expect(config.browser.timeoutMs).toBe(20_000);
     expect(config.limits.maxReadItems).toBe(5);
+    expect(config.limits.maxPostChars).toBe(4_000);
     expect(config.artifacts.saveErrorArtifacts).toBe(true);
   });
 
@@ -56,6 +58,7 @@ describe('loadConfig', () => {
     const config = loadConfig({});
     expect(config.browser.timeoutMs).toBe(15_000);
     expect(config.limits.maxReadItems).toBe(20);
+    expect(config.limits.maxPostChars).toBe(25_000);
     expect(config.limits.writeRatePerHour).toBe(10);
     expect(config.safety.actionTokenTtlMs).toBe(120_000);
     expect(config.artifacts.dir).toBe('artifacts');
@@ -71,6 +74,8 @@ describe('loadConfig', () => {
   it('rejects out-of-range read and write limits', () => {
     expect(() => loadConfig({ X_MAX_READ_ITEMS: '0' })).toThrow(/X_MAX_READ_ITEMS/);
     expect(() => loadConfig({ X_MAX_READ_ITEMS: '101' })).toThrow(/X_MAX_READ_ITEMS/);
+    expect(() => loadConfig({ X_MAX_POST_CHARS: '0' })).toThrow(/X_MAX_POST_CHARS/);
+    expect(() => loadConfig({ X_MAX_POST_CHARS: '25001' })).toThrow(/X_MAX_POST_CHARS/);
     expect(() => loadConfig({ X_WRITE_RATE_PER_HOUR: '0' })).toThrow(/X_WRITE_RATE_PER_HOUR/);
     expect(() => loadConfig({ X_WRITE_RATE_PER_HOUR: '1000' })).toThrow(/X_WRITE_RATE_PER_HOUR/);
   });

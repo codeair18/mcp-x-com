@@ -48,9 +48,14 @@ interface WriteServiceDeps {
   limiter: WriteRateLimiter;
   timeoutMs: number;
   urls?: WriteUrlResolver;
+  /** Prepare-time text cap; defaults to the Premium ceiling. */
+  maxPostChars?: number;
 }
 
-const MAX_POST_CHARS = 280;
+/** Post length without Premium; X's compose UI enforces it, we only classify. */
+export const FREE_POST_CHARS = 280;
+/** X Premium's post-length ceiling. */
+export const PREMIUM_POST_CHARS = 25_000;
 const MAX_IMAGES = 4;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
@@ -65,12 +70,14 @@ const ALLOWED_IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.web
  */
 export class WriteService {
   private readonly urls: WriteUrlResolver;
+  readonly maxPostChars: number;
 
   constructor(
     private readonly manager: BrowserManager,
     private readonly deps: WriteServiceDeps,
   ) {
     this.urls = deps.urls ?? liveWriteUrls;
+    this.maxPostChars = deps.maxPostChars ?? PREMIUM_POST_CHARS;
   }
 
   async preparePost(input: { text: string; mediaPaths?: string[] }): Promise<PrepareResult> {
@@ -207,10 +214,10 @@ export class WriteService {
     if (text.trim().length === 0) {
       throw new XError('INVALID_TARGET', 'Post text must not be empty');
     }
-    if (text.length > MAX_POST_CHARS) {
+    if (text.length > this.maxPostChars) {
       throw new XError(
         'INVALID_TARGET',
-        `Post text is ${text.length} characters — the limit is ${MAX_POST_CHARS}`,
+        `Post text is ${text.length} characters — the limit is ${this.maxPostChars}`,
       );
     }
   }
@@ -290,6 +297,15 @@ export class WriteService {
         // here means nothing was submitted.
         await button.click({ timeout: this.deps.timeoutMs });
       } catch {
+        // The compose UI is the source of truth for the account's real
+        // limit: without Premium it keeps the button disabled above 280.
+        if (text.length > FREE_POST_CHARS) {
+          throw new XError(
+            'PREMIUM_REQUIRED',
+            `The post button never enabled for a ${text.length}-character draft — ` +
+              `the account's limit is likely ${FREE_POST_CHARS} (no X Premium); nothing was submitted`,
+          );
+        }
         throw new XError(
           'SELECTOR_DRIFT',
           'The post button never became clickable — nothing was submitted',
